@@ -144,12 +144,12 @@ class ModifiedTensorBoard(TensorBoard):
 
 class DeepQLearningControls(Controls):
     MEMORY_SIZE = 1_000_000
-    BATCH_SIZE = 512
-    UPDATE_LIMIT = 10
+    BATCH_SIZE = 64_000
+    UPDATE_LIMIT = 2
 
     def __init__(self, directory):
         self.directory = directory
-        self.replay_memory = deque(maxlen=DeepQLearningControls.MEMORY_SIZE)
+        self.replay_memory = deque()
 
         self.model = self.build_compile_model()
         self.target_model = self.build_compile_model()
@@ -167,9 +167,11 @@ class DeepQLearningControls(Controls):
     def build_compile_model(self):
         model = Sequential()
         model.add(Dense(7, input_shape=[7], activation='relu'))
+        model.add(Dense(7, activation='relu'))
+        model.add(Dense(7, activation='relu'))
+        model.add(Dense(7, activation='relu'))
         # model.add(Dense(64, activation='relu'))
-        # model.add(Dense(64, activation='relu'))
-        model.add(Dense(4, activation='linear'))
+        model.add(Dense(4, activation='sigmoid'))
 
         model.compile(loss="mse", optimizer=Adam(learning_rate=HyperParameters.learning_rate), metrics=['accuracy'])
         return model
@@ -180,73 +182,46 @@ class DeepQLearningControls(Controls):
     def get_action(self, state):
         if random.random() < HyperParameters.epsilon:
             return random.randint(0, 3)
-        # with tf.device("gpu:0"):
         qs = self.get_qs(state)
         action = np.argmax(qs)
         return action
 
     def learn(self):
-        # return
-        # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < self.BATCH_SIZE:
             return
 
-        # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.BATCH_SIZE)
 
-        # Get current states from minibatch, then query NN model for Q values
         current_states = np.array([transition[0] for transition in minibatch])
         current_qs_list = self.model.predict(current_states, verbose=0)
 
-        # Get future states from minibatch, then query NN model for Q values
-        # When using target network, query it, otherwise main network should be queried
         new_current_states = np.array([transition[3] for transition in minibatch])
         future_qs_list = self.target_model.predict(new_current_states, verbose=0)
 
         X = []
         y = []
 
-        # Now we need to enumerate our batches
         for index, (current_state, action, reward, new_current_state) in enumerate(minibatch):
             max_future_q = np.max(future_qs_list[index])
             new_q = reward + HyperParameters.discount * max_future_q
 
-            # Update Q value for given state
             current_qs = current_qs_list[index]
             current_qs[action] = new_q
 
-            # And append to our training data
             X.append(current_state)
             y.append(current_qs)
 
-        # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(X), np.array(y), batch_size=DeepQLearningControls.BATCH_SIZE, verbose=0, shuffle=False,
-                       # callbacks=[ModifiedTensorBoard(log_dir="logs")]
-                       )
+        self.model.fit(np.array(X), np.array(y), epochs=1, batch_size=DeepQLearningControls.BATCH_SIZE,  verbose=0, shuffle=False)
 
-        # Update target network counter every episode
         self.target_update_counter += 1
 
-        # If counter reaches set value, update target network with weights of main network
         if self.target_update_counter > DeepQLearningControls.UPDATE_LIMIT:
             self.target_model.set_weights(self.model.get_weights())
             self.target_update_counter = 0
 
-    # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state):
-        # start = time.time()
-        # state = np.array(state)
-        # print(state.shape)
-        # state = np.array(state).reshape(-1,HyperParameters.observation_size)
-        # print(state)
         state = [state]
-        # print(state)
-        # print(state.shape)
         qs = self.model(np.array(state), training=False)
-        # print(qs)
-        # end = time.time()
-        # print(end - start)
-        # print(qs)
         return qs[0]
 
     def calculate_stats(self):

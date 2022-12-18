@@ -44,20 +44,12 @@ class Agent(Entity):
         self.touch_sensors = [
             (self.coordinates.x - math.sin(self.angle) * self.touch_sensor_length,
              self.coordinates.y + math.cos(self.angle) * self.touch_sensor_length),
-            # (self.coordinates.x - math.sin(self.angle + math.pi / 4) * self.touch_sensor_length,
-            #  self.coordinates.y + math.cos(self.angle + math.pi / 4) * self.touch_sensor_length),
             (self.coordinates.x - math.sin(self.angle + math.pi / 2) * self.touch_sensor_length,
              self.coordinates.y + math.cos(self.angle + math.pi / 2) * self.touch_sensor_length),
             (self.coordinates.x - math.sin(self.angle - math.pi / 2) * self.touch_sensor_length,
              self.coordinates.y + math.cos(self.angle - math.pi / 2) * self.touch_sensor_length),
-            # (self.coordinates.x - math.sin(self.angle - math.pi / 4) * self.touch_sensor_length,
-            #  self.coordinates.y + math.cos(self.angle - math.pi / 4) * self.touch_sensor_length),
             (self.coordinates.x - math.sin(self.angle + math.pi) * self.touch_sensor_length,
              self.coordinates.y + math.cos(self.angle + math.pi) * self.touch_sensor_length),
-            # (self.coordinates.x - math.sin(self.angle - 3 * math.pi / 4) * self.touch_sensor_length,
-            #  self.coordinates.y + math.cos(self.angle - 3 * math.pi / 4) * self.touch_sensor_length),
-            # (self.coordinates.x - math.sin(self.angle + 3 * math.pi / 4) * self.touch_sensor_length,
-            #  self.coordinates.y + math.cos(self.angle + 3 * math.pi / 4) * self.touch_sensor_length),
         ]
 
     def update(self):
@@ -96,7 +88,6 @@ class Agent(Entity):
         if self.energy <= 0:
             self.reward = -100
             self.game_environment.remove(self)
-            # self.game_environment.food.append(game_environment.Food(self.coordinates))
             return
 
         self.update_body()
@@ -120,12 +111,12 @@ class Agent(Entity):
                         self.reward = 10
 
         if self.energy > self.reproduction_threshold:
-            child = Agent(self.game_environment, self.coordinates.copy(), self.angle, self.brain)
+            child = Agent(self.game_environment, self.coordinates.copy(), random.randrange(6), self.brain)
             child.tag = self.tag
-            child.energy = self.reproduction_threshold
+            child.energy = self.energy/2
             child.state = child.get_state()
             self.game_environment.add(child)
-            self.energy -= self.reproduction_threshold
+            self.energy = self.energy/2
             self.reward = 100
 
     def draw(self, screen, camera):
@@ -137,9 +128,6 @@ class Agent(Entity):
                              touch_sensor + camera.offset, 1)
 
         pygame.draw.circle(screen, RED if self.tag == "carnivore" else GREEN, self.coordinates + camera.offset, self.radius)
-        # pygame.draw.line(screen, (255, 0, 0), self.coordinates + camera.offset,
-        #                  (self.coordinates.x - math.sin(self.angle) * self.forward_vec_size,
-        #                   self.coordinates.y + math.cos(self.angle) * self.forward_vec_size) + camera.offset, 1)
 
     def rotate(self, rads):
         self.angle += rads
@@ -164,9 +152,9 @@ class Agent(Entity):
                 environment_state.append(1.0 if max_val > 1 else max_val)
         elif self.tag == "carnivore":
             for sensor in self.food_sensors:
-                sensor_values = [1.0]
+                sensor_values = [0.0]
                 for entity in self.game_environment.entities:
-                    if entity != self:
+                    if entity != self and entity.tag == "herbivore":
                         try:
                             distance = pygame.math.Vector2.distance_to(pygame.math.Vector2(sensor), entity.coordinates)
                             sensor_values.append(100 / distance)
@@ -176,7 +164,7 @@ class Agent(Entity):
                 environment_state.append(1.0 if max_val > 1 else max_val)
 
         entities = self.game_environment.get_entities()
-        entities.extend(self.game_environment.food)
+        # entities.extend(self.game_environment.food)
         for sensor in self.touch_sensors:
             added = False
             # if not self.game_environment.map.is_in_bounds(pygame.math.Vector2(sensor)):
@@ -203,6 +191,8 @@ class Agent(Entity):
         #         self.reward = -1
         if self.reward == 0:
             self.reward = (next_state[1] + next_state[2]) - (self.state[1] + self.state[2])
+            # if self.reward < 0:
+            #     self.reward = 0
         self.brain.store(self.state, self.action, self.reward, next_state)
         self.reward = 0
 

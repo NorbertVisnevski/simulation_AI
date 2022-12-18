@@ -1,9 +1,9 @@
 class HyperParameters:
-    learning_rate = 0.1
+    learning_rate = 0.001
     inverse_alpha = 1 - learning_rate
-    discount = 0.9
+    discount = 0.5
     epsilon = 1.0
-    epsilon_decay = 0.99
+    epsilon_decay = 0.8
     epoch = 0
     episode = 0
     observation_size = 7

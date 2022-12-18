@@ -8,7 +8,7 @@ from global_data import FOOD_COLOR
 class Map(Entity):
     tag = "map"
     x = int(2500)
-    y = int(1500)
+    y = int(1400)
     thickness = 5
 
     def __init__(self):
@@ -42,7 +42,7 @@ class GameEnvironment(Entity):
         self.map = Map()
         self.food = []
         self.max_entities = 6
-        self.food_count = self.max_entities
+        self.food_count = self.max_entities * 10
         self.food_cycle = 0
         self.food_cycle_end = 10
         self.dead = []

@@ -6,8 +6,7 @@ import sys
 import csv
 
 from brain import QLearningControls, HyperParameters, DeepQLearningControls
-from game_environment import Map, GameEnvironment
-from agent import Agent
+from game_environment import GameEnvironment
 from global_data import BLACK
 
 
@@ -32,21 +31,26 @@ class Camera:
 
 def main():
     clock = pygame.time.Clock()
-    learning = True
-    HyperParameters.epsilon = 1
-    HyperParameters.episode = 1
+    learning = False
+    HyperParameters.epsilon = 0.2
+    _episode = 7804
+    HyperParameters.episode = _episode + 1
     game = GameEnvironment()
 
-    AI_DIRECTORY = "Q_LEARNING_EPISODE"
+    AI_DIRECTORY = "Q_LEARNING_ALPHA02_NO_NEGATIVE_REWARDS"
     carnivoreAI = QLearningControls(AI_DIRECTORY)
     herbivoreAI = QLearningControls(AI_DIRECTORY)
-    # AI_DIRECTORY = "DEEP_Q_LEARNING_EPISODE_SMALL_NET"
+    # AI_DIRECTORY = "DEEP_Q_LEARNING_SIGMOID_7-7-7-7-4_NO_NEGATIVE_RELU"
     # carnivoreAI = DeepQLearningControls(AI_DIRECTORY)
     # herbivoreAI = DeepQLearningControls(AI_DIRECTORY)
     os.makedirs(f"{os.getcwd()}/{AI_DIRECTORY}", exist_ok=True)
 
-    # carnivoreAI.load("carnivore323594")
-    # herbivoreAI.load("herbivore323594")
+    try:
+        carnivoreAI.load("carnivore" + str(_episode))
+        herbivoreAI.load("herbivore" + str(_episode))
+        print("loaded agents")
+    except:
+        print("failed to load agents")
 
     game.carnivoreAI = carnivoreAI
     game.herbivoreAI = herbivoreAI
@@ -62,13 +66,14 @@ def main():
     draw = False
 
     stats=[]
-
-    # with open(f"{AI_DIRECTORY}/stats.csv") as csv_file:
-    #     csv_reader = csv.reader(csv_file, delimiter=',')
-    #     line_count = 0
-    #     for row in csv_reader:
-    #         stats.append(row)
-    #     stats.pop(0)
+    try:
+        with open(f"{AI_DIRECTORY}/stats.csv") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                stats.append(row)
+            stats.pop(0)
+    except:
+        pass
     header = ["episode",
               "epsilon",
               "time",
@@ -132,16 +137,9 @@ def main():
                     HyperParameters.epsilon = 1
             game.reset_simulation()
             HyperParameters.episode += 1
-            start_time = time.time()
 
         camera.update()
         game.update()
-        # if learning:
-        #     carnivoreAI.learn()
-        #     herbivoreAI.learn()
-        # if
-        # carnivoreAI.learn()
-        # herbivoreAI.learn()
 
         if draw:
             game.draw(screen, camera)
@@ -152,9 +150,7 @@ def main():
 
         pygame.display.update()
 
-        # clock.tick(60)
+        clock.tick(60)
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
