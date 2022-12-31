@@ -31,18 +31,18 @@ class Camera:
 
 def main():
     clock = pygame.time.Clock()
-    learning = False
-    HyperParameters.epsilon = 0.2
-    _episode = 7804
+    learning = True
+    HyperParameters.epsilon = 0
+    _episode = 4493
     HyperParameters.episode = _episode + 1
     game = GameEnvironment()
 
-    AI_DIRECTORY = "Q_LEARNING_ALPHA02_NO_NEGATIVE_REWARDS"
-    carnivoreAI = QLearningControls(AI_DIRECTORY)
-    herbivoreAI = QLearningControls(AI_DIRECTORY)
-    # AI_DIRECTORY = "DEEP_Q_LEARNING_SIGMOID_7-7-7-7-4_NO_NEGATIVE_RELU"
-    # carnivoreAI = DeepQLearningControls(AI_DIRECTORY)
-    # herbivoreAI = DeepQLearningControls(AI_DIRECTORY)
+    # AI_DIRECTORY = "Q_LEARNING_ALPHA_0,001_DISCOUNT_0,5"
+    # carnivoreAI = QLearningControls(AI_DIRECTORY)
+    # herbivoreAI = QLearningControls(AI_DIRECTORY)
+    AI_DIRECTORY = "DEEP_Q_LEARNING_RELU_7-32-32-32-4_ALPHA_0,001_DISCOUNT_0,5"
+    carnivoreAI = DeepQLearningControls(AI_DIRECTORY)
+    herbivoreAI = DeepQLearningControls(AI_DIRECTORY)
     os.makedirs(f"{os.getcwd()}/{AI_DIRECTORY}", exist_ok=True)
 
     try:
@@ -150,7 +150,7 @@ def main():
 
         pygame.display.update()
 
-        clock.tick(60)
+        # clock.tick(60)
 
 if __name__ == '__main__':
     main()

@@ -6,14 +6,10 @@ import json
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten, Embedding, Reshape
-from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from collections import deque
 import numpy as np
-import tensorflow as tf
-import time
 from global_data import HyperParameters
-from tensorflow import float32
 
 
 class Controls:
@@ -110,38 +106,6 @@ class QLearningControls(Controls):
             pass
 
 
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.step = 1
-        self.writer = tf.summary.create_file_writer(self.log_dir)
-
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
-
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
-    def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
-
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
-    def on_batch_end(self, batch, logs=None):
-        pass
-
-    # Overrided, so won't close writer
-    def on_train_end(self, logs=None):
-        pass
-
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
-    def update_stats(self, **stats):
-        self._write_logs(stats, self.step)
-
-
 class DeepQLearningControls(Controls):
     MEMORY_SIZE = 1_000_000
     BATCH_SIZE = 64_000
@@ -156,8 +120,6 @@ class DeepQLearningControls(Controls):
         self.align_target_model()
         self.rewards = list()
 
-        # self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format("Deeeep", int(time.time())))
-
         self.target_update_counter = 0
 
     def store(self, state, action, reward, next_state):
@@ -167,9 +129,9 @@ class DeepQLearningControls(Controls):
     def build_compile_model(self):
         model = Sequential()
         model.add(Dense(7, input_shape=[7], activation='relu'))
-        model.add(Dense(7, activation='relu'))
-        model.add(Dense(7, activation='relu'))
-        model.add(Dense(7, activation='relu'))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dense(32, activation='relu'))
+        model.add(Dense(32, activation='relu'))
         # model.add(Dense(64, activation='relu'))
         model.add(Dense(4, activation='sigmoid'))
 
