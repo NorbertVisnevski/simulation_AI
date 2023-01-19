@@ -107,9 +107,8 @@ class QLearningControls(Controls):
 
 
 class DeepQLearningControls(Controls):
-    MEMORY_SIZE = 1_000_000
-    BATCH_SIZE = 64_000
-    UPDATE_LIMIT = 2
+    BATCH_SIZE = HyperParameters.BATCH_SIZE
+    UPDATE_LIMIT = HyperParameters.UPDATE_LIMIT
 
     def __init__(self, directory):
         self.directory = directory

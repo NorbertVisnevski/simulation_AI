@@ -2,13 +2,13 @@ import random
 import pygame
 from agent import Herbivore, Carnivore
 from entity import *
-from global_data import FOOD_COLOR
+from global_data import FOOD_COLOR, HyperParameters
 
 
 class Map(Entity):
     tag = "map"
-    x = int(2500)
-    y = int(1400)
+    x = int(3000)
+    y = int(1500)
     thickness = 5
 
     def __init__(self):
@@ -24,7 +24,7 @@ class Map(Entity):
 class Food(Entity):
     tag = "food"
     radius = 25
-    food_value = 150
+    food_value = HyperParameters.food_value
 
     def __init__(self, location):
         self.coordinates = location
@@ -41,10 +41,10 @@ class GameEnvironment(Entity):
         self.entities = list()
         self.map = Map()
         self.food = []
-        self.max_entities = 6
-        self.food_count = self.max_entities * 10
+        self.max_entities = HyperParameters.max_entities
+        self.food_count = self.max_entities * 8
         self.food_cycle = 0
-        self.food_cycle_end = 10
+        self.food_cycle_end = HyperParameters.food_cycle_end
         self.dead = []
         self.herbivores = 0
         self.carnivores = 0
@@ -64,8 +64,10 @@ class GameEnvironment(Entity):
         self.herbivores = 0
         for i in range(self.max_entities):
             herbivore = Herbivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.herbivoreAI)
-            carnivore = Carnivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.carnivoreAI)
             self.add(herbivore)
+            self.place_food(True)
+        for i in range(int(self.max_entities/2)):
+            carnivore = Carnivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.carnivoreAI)
             self.add(carnivore)
             self.place_food(True)
 

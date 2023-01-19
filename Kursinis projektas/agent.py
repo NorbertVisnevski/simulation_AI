@@ -22,8 +22,8 @@ class Agent(Entity):
         self.coordinates: pygame.math.Vector2 = point
         self.angle = rotation
         self.energy = 900
-        self.food_value = 400
-        self.reproduction_threshold = 1200
+        self.food_value = HyperParameters.entity_food_value
+        self.reproduction_threshold = HyperParameters.reproduction_threshold
         self.max_energy = self.reproduction_threshold
         self.state = None
         self.action = 0

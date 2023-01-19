@@ -8,6 +8,7 @@ import csv
 from brain import QLearningControls, HyperParameters, DeepQLearningControls
 from game_environment import GameEnvironment
 from global_data import BLACK
+from param_handler import handle_params
 
 
 class Camera:
@@ -30,24 +31,21 @@ class Camera:
 
 
 def main():
+    handle_params()
     clock = pygame.time.Clock()
-    learning = True
-    HyperParameters.epsilon = 0
-    _episode = 4493
-    HyperParameters.episode = _episode + 1
     game = GameEnvironment()
 
-    # AI_DIRECTORY = "Q_LEARNING_ALPHA_0,001_DISCOUNT_0,5"
-    # carnivoreAI = QLearningControls(AI_DIRECTORY)
-    # herbivoreAI = QLearningControls(AI_DIRECTORY)
-    AI_DIRECTORY = "DEEP_Q_LEARNING_RELU_7-32-32-32-4_ALPHA_0,001_DISCOUNT_0,5"
-    carnivoreAI = DeepQLearningControls(AI_DIRECTORY)
-    herbivoreAI = DeepQLearningControls(AI_DIRECTORY)
-    os.makedirs(f"{os.getcwd()}/{AI_DIRECTORY}", exist_ok=True)
+    if not HyperParameters.deep_learning:
+        carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+        herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+    else:
+        carnivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
+        herbivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
+    os.makedirs(f"{os.getcwd()}/{HyperParameters.AI_DIRECTORY}", exist_ok=True)
 
     try:
-        carnivoreAI.load("carnivore" + str(_episode))
-        herbivoreAI.load("herbivore" + str(_episode))
+        carnivoreAI.load("carnivore" + str(HyperParameters._episode))
+        herbivoreAI.load("herbivore" + str(HyperParameters._episode))
         print("loaded agents")
     except:
         print("failed to load agents")
@@ -63,11 +61,13 @@ def main():
 
     game.reset_simulation()
     start_time = time.time()
+    frametimes = []
     draw = False
+    render_over = False
 
     stats=[]
     try:
-        with open(f"{AI_DIRECTORY}/stats.csv") as csv_file:
+        with open(f"{HyperParameters.AI_DIRECTORY}/stats.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
                 stats.append(row)
@@ -83,13 +83,13 @@ def main():
               "her_avg",
               "her_min",
               "her_max"]
-
     while True:
-
+        frame_start_time = time.time()
         screen.fill((255, 255, 255))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # print(sum(frametimes) / len(frametimes))
                 pygame.quit()
                 sys.exit(0)
             if event.type == pygame.VIDEORESIZE:
@@ -100,7 +100,8 @@ def main():
             draw = not draw
 
         if game.is_simulation_dead():
-            if learning:
+            render_over = True
+            if HyperParameters.learning:
                 end_time = time.time()
 
                 episode_stats = []
@@ -123,34 +124,51 @@ def main():
 
                 stats.append(episode_stats)
 
+                start_time = time.time()
+
                 carnivoreAI.learn()
                 herbivoreAI.learn()
 
+                # frame_end_time = time.time()
+                # frametimes.append(frame_end_time - frame_start_time)
+
                 HyperParameters.decay_epsilon()
                 if HyperParameters.epsilon == 0:
-                    with open(f"{AI_DIRECTORY}/stats.csv", 'w', encoding='UTF8', newline='') as f:
+                    with open(f"{HyperParameters.AI_DIRECTORY}/stats.csv", 'w', encoding='UTF8', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow(header)
                         writer.writerows(stats)
                     carnivoreAI.save("carnivore")
                     herbivoreAI.save("herbivore")
                     HyperParameters.epsilon = 1
-            game.reset_simulation()
-            HyperParameters.episode += 1
+                game.reset_simulation()
+                render_over = False
+                HyperParameters.episode += 1
+            if keys[pygame.K_SPACE]:
+                game.reset_simulation()
+                render_over = False
+        else:
+            camera.update()
+            game.update()
 
-        camera.update()
-        game.update()
-
-        if draw:
+        if draw or not HyperParameters.learning:
             game.draw(screen, camera)
         screen.blit(font.render(f"Carnivores: {game.carnivores}", True, BLACK), (0, 0))
         screen.blit(font.render(f"Herbivores: {game.herbivores}", True, BLACK), (0, 36))
         screen.blit(font.render(f"Episode: {HyperParameters.episode}", True, BLACK), (0, 72))
         screen.blit(font.render(f"Epsilon: {round(HyperParameters.epsilon,5)}", True, BLACK), (0, 108))
 
-        pygame.display.update()
+        if render_over:
+            screen.blit(font.render(f"Simulation over!", True, BLACK), (screen.get_width() / 2 - 100, 250))
+            screen.blit(font.render(f"All {'carnivores' if game.carnivores == 0 else 'herbivores'} have been eliminated", True, BLACK), (screen.get_width() / 2 - 170, 300))
+            screen.blit(font.render(f"Press space to restart", True, BLACK), (screen.get_width() / 2 - 120, 350))
 
-        # clock.tick(60)
+        pygame.display.update()
+        # frame_end_time = time.time()
+        # frametimes.append(frame_end_time - frame_start_time)
+        if not HyperParameters.learning:
+            clock.tick(60)
+
 
 if __name__ == '__main__':
     main()
