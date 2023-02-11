@@ -13,7 +13,7 @@ class HyperParameters:
     episode = _episode + 1
     learning = True
     deep_learning = False
-    AI_DIRECTORY = "DEFAULT_TEST"
+    AI_DIRECTORY = "_DEFAULT_TEST"
     max_entities = 20
     food_cycle_end = 10
     food_value = 150*2
