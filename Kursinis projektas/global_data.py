@@ -1,33 +1,43 @@
 class HyperParameters:
-    learning_rate = 0.001
+    learning_rate = 0.1
     inverse_alpha = 1 - learning_rate
-    discount = 0.5
-    epsilon = 0.1
+    discount = 0.314
+    epsilon = 1
     epsilon_decay = 0.9
     epoch = 0
     observation_size = 7
     action_size = 4
     replay_memory_size = 2000
 
-    _episode = 7345
+    _episode = 0
     episode = _episode + 1
-    learning = False
+    learning = True
     deep_learning = False
-    AI_DIRECTORY = "Q_LEARNING_ALPHA02_NO_NEGATIVE_REWARDS"
-    max_entities = 8
+    AI_DIRECTORY = "DEFAULT_TEST"
+    max_entities = 20
     food_cycle_end = 10
     food_value = 150*2
     entity_food_value = 400
     reproduction_threshold = 1200
 
+    episode_iteration_count = 100_000
+    iteration = 0
+
     BATCH_SIZE = 64_000
     UPDATE_LIMIT = 2
+
+    MAP_X = 5_000
+    MAP_Y = 2_000
 
     @staticmethod
     def decay_epsilon():
         HyperParameters.epsilon *= HyperParameters.epsilon_decay
-        if HyperParameters.epsilon < 0.01:
-            HyperParameters.epsilon = 0
+        # if HyperParameters.epsilon < 0.01:
+        #     HyperParameters.epsilon = 0
+
+    @staticmethod
+    def reached_max_iterations():
+        return (HyperParameters.episode_iteration_count == HyperParameters.iteration) and HyperParameters.learning
 
 
 BLACK = (0, 0, 0)

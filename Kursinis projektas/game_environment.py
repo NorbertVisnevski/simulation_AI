@@ -7,8 +7,8 @@ from global_data import FOOD_COLOR, HyperParameters
 
 class Map(Entity):
     tag = "map"
-    x = int(3000)
-    y = int(1500)
+    x = int(HyperParameters.MAP_X)
+    y = int(HyperParameters.MAP_Y)
     thickness = 5
 
     def __init__(self):
@@ -65,8 +65,6 @@ class GameEnvironment(Entity):
         for i in range(self.max_entities):
             herbivore = Herbivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.herbivoreAI)
             self.add(herbivore)
-            self.place_food(True)
-        for i in range(int(self.max_entities/2)):
             carnivore = Carnivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.carnivoreAI)
             self.add(carnivore)
             self.place_food(True)
