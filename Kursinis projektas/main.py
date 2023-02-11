@@ -37,7 +37,7 @@ def main():
 
     if not HyperParameters.deep_learning:
         carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
-        herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+        herbivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
     else:
         carnivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
         herbivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
