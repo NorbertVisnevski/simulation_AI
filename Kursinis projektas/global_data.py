@@ -13,9 +13,9 @@ class HyperParameters:
     episode = _episode + 1
     learning = True
     deep_learning = False
-    AI_DIRECTORY = "_DEFAULT_TEST"
-    max_entities = 20
-    food_cycle_end = 10
+    AI_DIRECTORY = "MULTIPLE_GENOMES/DEFAULT-3-agents"
+    max_entities = 3
+    food_cycle_end = 20
     food_value = 150*2
     entity_food_value = 400
     reproduction_threshold = 1200
@@ -26,8 +26,8 @@ class HyperParameters:
     BATCH_SIZE = 64_000
     UPDATE_LIMIT = 2
 
-    MAP_X = 5_000
-    MAP_Y = 2_000
+    MAP_X = 2_000
+    MAP_Y = 1_000
 
     @staticmethod
     def decay_epsilon():

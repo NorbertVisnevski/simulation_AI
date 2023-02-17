@@ -1,5 +1,6 @@
 import math
 import random
+import copy
 from collections import deque
 
 import pygame
@@ -19,6 +20,9 @@ class Controls:
         pass
 
     def learn(self):
+        pass
+
+    def copy(self):
         pass
 
 
@@ -44,7 +48,6 @@ class PlayerControls(Controls):
             return 0
 
 
-
 class QLearningControls(Controls):
 
     def __init__(self, directory):
@@ -66,7 +69,7 @@ class QLearningControls(Controls):
             row = [random.random() for _ in range(HyperParameters.action_size)]
             self.Q_Table[key] = row
         if random.random() < HyperParameters.epsilon:
-            return random.randint(0, HyperParameters.action_size-1)
+            return random.randint(0, HyperParameters.action_size - 1)
         return np.argmax(row)
 
     def store(self, state, action, reward, next_state):
@@ -90,9 +93,13 @@ class QLearningControls(Controls):
         print(json.dumps(self.Q_Table, indent=2))
 
     def calculate_stats(self):
-        stats = sum(self.rewards) / len(self.rewards), min(self.rewards), max(self.rewards), sum(self.rewards), self.rewards.count(100)
-        self.rewards.clear()
+        stats = -100, -100, -100, -100, 0
+        if len(self.rewards) != 0:
+            stats = sum(self.rewards) / (len(self.rewards) or 1), min(self.rewards), max(self.rewards), sum(self.rewards), self.rewards.count(100)
         return stats
+
+    def clear_rewards(self):
+        self.rewards.clear()
 
     def save(self, file):
         serialized = json.dumps(self.Q_Table, indent=2)
@@ -106,8 +113,20 @@ class QLearningControls(Controls):
         except:
             pass
 
+    def copy(self):
+        otherAI = QLearningControls(self.directory)
+        otherAI.replay_memory = copy.deepcopy(self.replay_memory)
+        otherAI.Q_Table = copy.deepcopy(self.Q_Table)
+        return otherAI
+
 
 class ClosestQLearningControls(QLearningControls):
+
+    def copy(self):
+        otherAI = ClosestQLearningControls(self.directory)
+        otherAI.replay_memory = copy.deepcopy(self.replay_memory)
+        otherAI.Q_Table = copy.deepcopy(self.Q_Table)
+        return otherAI
 
     def get_action(self, state):
         key = self.state_to_key(state)
@@ -116,7 +135,7 @@ class ClosestQLearningControls(QLearningControls):
             row = [self.find_closes(state), state]
             self.Q_Table[key] = row
         if random.random() < HyperParameters.epsilon:
-            return random.randint(0, HyperParameters.action_size-1)
+            return random.randint(0, HyperParameters.action_size - 1)
         return np.argmax(row[0])
 
     def find_closes(self, state):
@@ -136,7 +155,11 @@ class ClosestQLearningControls(QLearningControls):
             row = self.Q_Table.get(key)
             # print(key)
             # print(self.Q_Table)
-            old_q = row[0][action]
+            old_q = 0
+            try:
+                old_q = row[0][action]
+            except:
+                pass
             next_key = self.state_to_key(next_state)
             next_row = self.Q_Table.get(next_key) or [self.find_closes(next_state), next_state]
             self.Q_Table[next_key] = next_row
@@ -211,7 +234,7 @@ class DeepQLearningControls(Controls):
             X.append(current_state)
             y.append(current_qs)
 
-        self.model.fit(np.array(X), np.array(y), epochs=1, batch_size=DeepQLearningControls.BATCH_SIZE,  verbose=0, shuffle=False)
+        self.model.fit(np.array(X), np.array(y), epochs=1, batch_size=DeepQLearningControls.BATCH_SIZE, verbose=0, shuffle=False)
 
         self.target_update_counter += 1
 

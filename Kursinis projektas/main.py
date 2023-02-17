@@ -37,7 +37,7 @@ def main():
 
     if not HyperParameters.deep_learning:
         carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
-        herbivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
+        herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
     else:
         carnivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
         herbivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
@@ -52,6 +52,7 @@ def main():
 
     game.carnivoreAI = carnivoreAI
     game.herbivoreAI = herbivoreAI
+    game.generate_genomes(carnivoreAI, herbivoreAI)
 
     pygame.init()
     font = pygame.font.SysFont('didot.ttc', 24)
@@ -115,12 +116,15 @@ def main():
 
                 episode_stats = []
 
+                carnivoreAI, herbivoreAI = game.get_best_AI()
+
                 episode_stats.append(HyperParameters.episode)
                 episode_stats.append(HyperParameters.iteration)
                 episode_stats.append(HyperParameters.epsilon)
                 episode_stats.append(end_time - start_time)
 
                 avg, min, max, cumulative, reproductions = carnivoreAI.calculate_stats()
+                carnivoreAI.clear_rewards()
 
                 episode_stats.append(avg)
                 episode_stats.append(min)
@@ -130,6 +134,7 @@ def main():
                 episode_stats.append(len(carnivoreAI.Q_Table.keys()))
 
                 avg, min, max, cumulative, reproductions = herbivoreAI.calculate_stats()
+                herbivoreAI.clear_rewards()
 
                 episode_stats.append(avg)
                 episode_stats.append(min)
@@ -151,14 +156,16 @@ def main():
                     writer = csv.writer(f)
                     writer.writerow(header)
                     writer.writerows(stats)
-                carnivoreAI.save("carnivore")
-                herbivoreAI.save("herbivore")
+                # carnivoreAI.save("carnivore")
+                # herbivoreAI.save("herbivore")
                 # HyperParameters.epsilon = 1
+                game.generate_genomes(carnivoreAI, herbivoreAI)
                 game.reset_simulation()
                 render_over = False
                 HyperParameters.episode += 1
                 HyperParameters.iteration = 0
             if keys[pygame.K_SPACE]:
+                game.generate_genomes(carnivoreAI, herbivoreAI)
                 game.reset_simulation()
                 render_over = False
         else:

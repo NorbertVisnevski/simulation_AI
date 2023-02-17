@@ -1,6 +1,10 @@
+import os
 import random
+import time
+
 import pygame
 from agent import Herbivore, Carnivore
+from brain import QLearningControls, ClosestQLearningControls
 from entity import *
 from global_data import FOOD_COLOR, HyperParameters
 
@@ -48,6 +52,8 @@ class GameEnvironment(Entity):
         self.dead = []
         self.herbivores = 0
         self.carnivores = 0
+        self.herbivoreAIs = []
+        self.carnivoreAIs = []
 
     def place_food(self, force=False):
         if self.food_cycle >= self.food_cycle_end or force:
@@ -63,9 +69,9 @@ class GameEnvironment(Entity):
         self.carnivores = 0
         self.herbivores = 0
         for i in range(self.max_entities):
-            herbivore = Herbivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.herbivoreAI)
+            herbivore = Herbivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.herbivoreAIs[i])
             self.add(herbivore)
-            carnivore = Carnivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.carnivoreAI)
+            carnivore = Carnivore(self, pygame.math.Vector2(random.randrange(self.map.x), random.randrange(self.map.y)), random.randrange(6), self.carnivoreAIs[i])
             self.add(carnivore)
             self.place_food(True)
 
@@ -103,9 +109,44 @@ class GameEnvironment(Entity):
     def add(self, entity):
         if entity.tag == "herbivore":
             self.herbivores += 1
+            self.herbivoreAIs.append(entity.brain.copy())
         elif entity.tag == "carnivore":
             self.carnivores += 1
+            self.carnivoreAIs.append(entity.brain.copy())
         self.entities.append(entity)
 
     def get_entities(self):
         return list(self.entities)
+
+    def generate_genomes(self, carnivoreAI, herbivoreAI):
+        start_time = time.time()
+        self.herbivoreAIs.clear()
+        self.carnivoreAIs.clear()
+        for i in range(self.max_entities):
+            self.herbivoreAIs.append(herbivoreAI.copy())
+            self.carnivoreAIs.append(carnivoreAI.copy())
+        end_time = time.time()
+        print(end_time - start_time, 'time')
+
+    def get_best_AI(self):
+        # print(len(self.carnivoreAIs), len(self.herbivoreAIs))
+        # start_time = time.time()
+        carnivoreAI = self.carnivoreAIs[0]
+        for i in range(1, len(self.carnivoreAIs)):
+            b_avg, b_min, b_max, b_cumulative, b_reproductions = carnivoreAI.calculate_stats()
+            t_avg, t_min, t_max, t_cumulative, t_reproductions = self.carnivoreAIs[i].calculate_stats()
+            if t_cumulative > b_cumulative:
+                print(t_cumulative, b_cumulative)
+                carnivoreAI = self.carnivoreAIs[i]
+
+        herbivoreAI = self.herbivoreAIs[0]
+        for i in range(1, len(self.herbivoreAIs)):
+            b_avg, b_min, b_max, b_cumulative, b_reproductions = herbivoreAI.calculate_stats()
+            t_avg, t_min, t_max, t_cumulative, t_reproductions = self.herbivoreAIs[i].calculate_stats()
+            if t_cumulative > b_cumulative:
+                herbivoreAI = self.herbivoreAIs[i]
+
+        # end_time = time.time()
+        # print(end_time - start_time, 'time')
+
+        return carnivoreAI, herbivoreAI
