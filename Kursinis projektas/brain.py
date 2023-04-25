@@ -133,10 +133,12 @@ class ClosestQLearningControls(QLearningControls):
     def learn(self):
         for (state, action, reward, next_state) in self.replay_memory:
             key = self.state_to_key(state)
-            row = self.Q_Table.get(key)
+            row = self.Q_Table.get(key) or [self.find_closes(next_state), next_state]
             # print(key)
             # print(self.Q_Table)
-            old_q = row[0][action]
+            old_q = 0
+            if row[0] is not None:
+                old_q = row[0][action]
             next_key = self.state_to_key(next_state)
             next_row = self.Q_Table.get(next_key) or [self.find_closes(next_state), next_state]
             self.Q_Table[next_key] = next_row

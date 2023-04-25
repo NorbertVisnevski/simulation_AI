@@ -1,7 +1,9 @@
 class HyperParameters:
-    learning_rate = 0.1
+    learning_rate = 0.001
+    # learning_rate = 0.1
     inverse_alpha = 1 - learning_rate
-    discount = 0.314
+    discount = 0.9
+    # discount = 0.3
     epsilon = 1
     epsilon_decay = 0.9
     epoch = 0
@@ -14,9 +16,11 @@ class HyperParameters:
     learning = True
     deep_learning = False
     AI_DIRECTORY = "_DEFAULT_TEST"
-    max_entities = 20
+    max_entities = 5
+    # max_entities = 20
     food_cycle_end = 10
-    food_value = 150*2
+    food_value = 150
+    # food_value = 300
     entity_food_value = 400
     reproduction_threshold = 1200
 
