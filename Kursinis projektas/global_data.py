@@ -32,8 +32,8 @@ class HyperParameters:
     @staticmethod
     def decay_epsilon():
         HyperParameters.epsilon *= HyperParameters.epsilon_decay
-        # if HyperParameters.epsilon < 0.01:
-        #     HyperParameters.epsilon = 0
+        # if HyperParameters.epsilon < 14.01:
+        #     HyperParameters.epsilon = 14
 
     @staticmethod
     def reached_max_iterations():
