@@ -30,17 +30,22 @@ class Camera:
             self.offset.update(pygame.Vector2(self.offset.x - speed, self.offset.y))
 
 
-def main():
+def main(task):
     # handle_params()
     clock = pygame.time.Clock()
     game = GameEnvironment()
 
     if not HyperParameters.deep_learning:
-        carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
-        herbivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
+        if task == 0:
+            carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+            herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+        else:
+            carnivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
+            herbivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
     else:
         carnivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
         herbivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
+
     os.makedirs(f"{os.getcwd()}/{HyperParameters.AI_DIRECTORY}", exist_ok=True)
 
     try:
@@ -151,13 +156,19 @@ def main():
                     writer = csv.writer(f)
                     writer.writerow(header)
                     writer.writerows(stats)
-                carnivoreAI.save("carnivore")
-                herbivoreAI.save("herbivore")
+                # carnivoreAI.save("carnivore")
+                # herbivoreAI.save("herbivore")
                 # HyperParameters.epsilon = 1
                 game.reset_simulation()
                 render_over = False
                 HyperParameters.episode += 1
-                HyperParameters.iteration = 0
+                # HyperParameters.iteration = 0
+                if HyperParameters.learning:
+                    carnivoreAI.learn()
+                    herbivoreAI.learn()
+                    # HyperParameters.iteration += 1
+                if HyperParameters.episode == 10001:
+                    return
             if keys[pygame.K_SPACE]:
                 game.reset_simulation()
                 render_over = False
@@ -178,10 +189,10 @@ def main():
             screen.blit(font.render(f"Press space to restart", True, BLACK), (screen.get_width() / 2 - 120, 350))
 
         pygame.display.update()
-        if HyperParameters.learning:
-            carnivoreAI.learn()
-            herbivoreAI.learn()
-            HyperParameters.iteration += 1
+        # if HyperParameters.learning:
+        #     carnivoreAI.learn()
+        #     herbivoreAI.learn()
+        #     HyperParameters.iteration += 1
         # frame_end_time = time.time()
         # frametimes.append(frame_end_time - frame_start_time)
         if not HyperParameters.learning:
@@ -189,4 +200,19 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    for i in range(3):
+        HyperParameters.episode = 1
+        HyperParameters._episode = 0
+        HyperParameters.epoch = 0
+        HyperParameters.iteration = 0
+        HyperParameters.epsilon = 1
+        HyperParameters.AI_DIRECTORY = "DEFAULT_AVERAGE2/" + str(i)
+        main(0)
+    for i in range(3):
+        HyperParameters.episode = 1
+        HyperParameters._episode = 0
+        HyperParameters.epoch = 0
+        HyperParameters.iteration = 0
+        HyperParameters.epsilon = 1
+        HyperParameters.AI_DIRECTORY = "CLOSEST_AVERAGE2/" + str(i)
+        main(1)
