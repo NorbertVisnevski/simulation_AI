@@ -167,7 +167,7 @@ def main(task):
                     carnivoreAI.learn()
                     herbivoreAI.learn()
                     # HyperParameters.iteration += 1
-                if HyperParameters.episode == 10001:
+                if HyperParameters.episode == 1001:
                     return
             if keys[pygame.K_SPACE]:
                 game.reset_simulation()
@@ -200,19 +200,42 @@ def main(task):
 
 
 if __name__ == '__main__':
-    for i in range(3):
-        HyperParameters.episode = 1
-        HyperParameters._episode = 0
-        HyperParameters.epoch = 0
-        HyperParameters.iteration = 0
-        HyperParameters.epsilon = 1
-        HyperParameters.AI_DIRECTORY = "DEFAULT_AVERAGE2/" + str(i)
-        main(0)
-    for i in range(3):
-        HyperParameters.episode = 1
-        HyperParameters._episode = 0
-        HyperParameters.epoch = 0
-        HyperParameters.iteration = 0
-        HyperParameters.epsilon = 1
-        HyperParameters.AI_DIRECTORY = "CLOSEST_AVERAGE2/" + str(i)
-        main(1)
+    HyperParameters.episode = 1
+    HyperParameters._episode = 0
+    HyperParameters.epoch = 0
+    HyperParameters.iteration = 0
+    HyperParameters.epsilon = 1
+    HyperParameters.AI_DIRECTORY = "spedup-low1"
+    main(0)
+    HyperParameters.episode = 1
+    HyperParameters._episode = 0
+    HyperParameters.epoch = 0
+    HyperParameters.iteration = 0
+    HyperParameters.epsilon = 1
+    HyperParameters.AI_DIRECTORY = "spedup-low2"
+    HyperParameters.max_entities = 15
+    main(0)
+    HyperParameters.episode = 1
+    HyperParameters._episode = 0
+    HyperParameters.epoch = 0
+    HyperParameters.iteration = 0
+    HyperParameters.epsilon = 1
+    HyperParameters.AI_DIRECTORY = "spedup-low3"
+    HyperParameters.max_entities = 25
+    main(0)
+    HyperParameters.episode = 1
+    HyperParameters._episode = 0
+    HyperParameters.epoch = 0
+    HyperParameters.iteration = 0
+    HyperParameters.epsilon = 1
+    HyperParameters.AI_DIRECTORY = "spedup-low4"
+    HyperParameters.max_entities = 35
+    main(0)
+    # for i in range(3):
+    #     HyperParameters.episode = 1
+    #     HyperParameters._episode = 0
+    #     HyperParameters.epoch = 0
+    #     HyperParameters.iteration = 0
+    #     HyperParameters.epsilon = 1
+    #     HyperParameters.AI_DIRECTORY = "CLOSEST_AVERAGE2/" + str(i)
+    #     main(1)

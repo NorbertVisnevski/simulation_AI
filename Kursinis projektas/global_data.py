@@ -1,11 +1,11 @@
 class HyperParameters:
-    learning_rate = 0.001
-    # learning_rate = 0.1
+    # learning_rate = 0.0001
+    learning_rate = 0.1
     inverse_alpha = 1 - learning_rate
-    discount = 0.9
+    discount = 0.1
     # discount = 0.3
     epsilon = 1
-    epsilon_decay = 0.9
+    epsilon_decay = 0.95
     epoch = 0
     observation_size = 7
     action_size = 4
@@ -19,10 +19,10 @@ class HyperParameters:
     max_entities = 5
     # max_entities = 20
     food_cycle_end = 10
-    food_value = 150
-    # food_value = 300
+    # food_value = 100
+    food_value = 300
     entity_food_value = 400
-    reproduction_threshold = 1200
+    reproduction_threshold = 1300
 
     episode_iteration_count = 100_000
     iteration = 0
