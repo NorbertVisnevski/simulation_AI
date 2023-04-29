@@ -108,7 +108,7 @@ class Agent(Entity):
                         entity.reward = -100
                         self.energy += entity.food_value
                         self.game_environment.remove(entity)
-                        self.reward = 10
+                        self.reward = 20
 
         if self.energy > self.reproduction_threshold:
             child = Agent(self.game_environment, self.coordinates.copy(), random.randrange(6), self.brain)
