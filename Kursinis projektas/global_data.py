@@ -1,11 +1,11 @@
 class HyperParameters:
-    learning_rate = 0.1
+    learning_rate = 0.01
     inverse_alpha = 1 - learning_rate
-    discount = 0.314
+    discount = 0.3
     epsilon = 1
-    epsilon_decay = 0.9
+    epsilon_decay = 0.95
     epoch = 0
-    observation_size = 7
+    observation_size = 3
     action_size = 4
     replay_memory_size = 2000
 
@@ -13,10 +13,10 @@ class HyperParameters:
     episode = _episode + 1
     learning = True
     deep_learning = False
-    AI_DIRECTORY = "MULTIPLE_GENOMES/DEFAULT-3-agents"
-    max_entities = 3
-    food_cycle_end = 20
-    food_value = 150*2
+    AI_DIRECTORY = "MULTIPLE_GENOMES/test"
+    max_entities = 6
+    food_cycle_end = 10
+    food_value = 300
     entity_food_value = 400
     reproduction_threshold = 1200
 
@@ -26,8 +26,8 @@ class HyperParameters:
     BATCH_SIZE = 64_000
     UPDATE_LIMIT = 2
 
-    MAP_X = 2_000
-    MAP_Y = 1_000
+    MAP_X = 4_000
+    MAP_Y = 2_000
 
     @staticmethod
     def decay_epsilon():

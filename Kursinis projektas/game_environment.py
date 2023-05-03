@@ -2,6 +2,7 @@ import os
 import random
 import time
 
+import numpy as np
 import pygame
 from agent import Herbivore, Carnivore
 from brain import QLearningControls, ClosestQLearningControls
@@ -135,18 +136,49 @@ class GameEnvironment(Entity):
         for i in range(1, len(self.carnivoreAIs)):
             b_avg, b_min, b_max, b_cumulative, b_reproductions = carnivoreAI.calculate_stats()
             t_avg, t_min, t_max, t_cumulative, t_reproductions = self.carnivoreAIs[i].calculate_stats()
-            if t_cumulative > b_cumulative:
-                print(t_cumulative, b_cumulative)
+            if t_reproductions > b_reproductions:
                 carnivoreAI = self.carnivoreAIs[i]
 
         herbivoreAI = self.herbivoreAIs[0]
         for i in range(1, len(self.herbivoreAIs)):
             b_avg, b_min, b_max, b_cumulative, b_reproductions = herbivoreAI.calculate_stats()
             t_avg, t_min, t_max, t_cumulative, t_reproductions = self.herbivoreAIs[i].calculate_stats()
-            if t_cumulative > b_cumulative:
+            if t_reproductions > b_reproductions:
                 herbivoreAI = self.herbivoreAIs[i]
 
         # end_time = time.time()
         # print(end_time - start_time, 'time')
 
         return carnivoreAI, herbivoreAI
+
+    def get_carnivore_stats(self):
+        avg_a = []
+        min_a = []
+        max_a = []
+        cumulative_a = []
+        reproductions_a = []
+        for ai in self.carnivoreAIs:
+            avg, min, max, cumulative, reproductions = ai.calculate_stats()
+            avg_a.append(avg)
+            min_a.append(min)
+            max_a.append(max)
+            cumulative_a.append(cumulative)
+            reproductions_a.append(reproductions)
+
+        return np.average(avg_a), np.average(min_a), np.average(max_a), np.average(cumulative_a), np.average(reproductions_a)
+
+    def get_herbivore_stats(self):
+        avg_a = []
+        min_a = []
+        max_a = []
+        cumulative_a = []
+        reproductions_a = []
+        for ai in self.herbivoreAIs:
+            avg, min, max, cumulative, reproductions = ai.calculate_stats()
+            avg_a.append(avg)
+            min_a.append(min)
+            max_a.append(max)
+            cumulative_a.append(cumulative)
+            reproductions_a.append(reproductions)
+
+        return np.average(avg_a), np.average(min_a), np.average(max_a), np.average(cumulative_a), np.average(reproductions_a)

@@ -123,7 +123,7 @@ def main():
                 episode_stats.append(HyperParameters.epsilon)
                 episode_stats.append(end_time - start_time)
 
-                avg, min, max, cumulative, reproductions = carnivoreAI.calculate_stats()
+                avg, min, max, cumulative, reproductions = game.get_carnivore_stats()
                 carnivoreAI.clear_rewards()
 
                 episode_stats.append(avg)
@@ -133,7 +133,7 @@ def main():
                 episode_stats.append(reproductions)
                 episode_stats.append(len(carnivoreAI.Q_Table.keys()))
 
-                avg, min, max, cumulative, reproductions = herbivoreAI.calculate_stats()
+                avg, min, max, cumulative, reproductions = game.get_herbivore_stats()
                 herbivoreAI.clear_rewards()
 
                 episode_stats.append(avg)
@@ -156,14 +156,17 @@ def main():
                     writer = csv.writer(f)
                     writer.writerow(header)
                     writer.writerows(stats)
-                # carnivoreAI.save("carnivore")
-                # herbivoreAI.save("herbivore")
+                if HyperParameters.episode % 100 == 0:
+                    carnivoreAI.save("carnivore")
+                    herbivoreAI.save("herbivore")
                 # HyperParameters.epsilon = 1
                 game.generate_genomes(carnivoreAI, herbivoreAI)
                 game.reset_simulation()
                 render_over = False
                 HyperParameters.episode += 1
                 HyperParameters.iteration = 0
+                if HyperParameters.episode > 10_000:
+                    return
             if keys[pygame.K_SPACE]:
                 game.generate_genomes(carnivoreAI, herbivoreAI)
                 game.reset_simulation()

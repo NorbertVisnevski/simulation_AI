@@ -165,20 +165,21 @@ class Agent(Entity):
 
         entities = self.game_environment.get_entities()
         # entities.extend(self.game_environment.food)
-        for sensor in self.touch_sensors:
-            added = False
-            # if not self.game_environment.map.is_in_bounds(pygame.math.Vector2(sensor)):
-            #     environment_state.append(1.0)
-            #     continue
-            for entity in entities:
-                if entity != self:
-                    distance = pygame.math.Vector2.distance_to(pygame.math.Vector2(sensor), entity.coordinates)
-                    if distance <= entity.radius * 1.5:
-                        environment_state.append(1.0)
-                        added = True
-                        break
-            if not added:
-                environment_state.append(0.0)
+
+        # for sensor in self.touch_sensors:
+        #     added = False
+        #     # if not self.game_environment.map.is_in_bounds(pygame.math.Vector2(sensor)):
+        #     #     environment_state.append(1.0)
+        #     #     continue
+        #     for entity in entities:
+        #         if entity != self:
+        #             distance = pygame.math.Vector2.distance_to(pygame.math.Vector2(sensor), entity.coordinates)
+        #             if distance <= entity.radius * 1.5:
+        #                 environment_state.append(1.0)
+        #                 added = True
+        #                 break
+        #     if not added:
+        #         environment_state.append(0.0)
 
         return environment_state
 
