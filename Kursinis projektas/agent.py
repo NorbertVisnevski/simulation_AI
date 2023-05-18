@@ -108,7 +108,7 @@ class Agent(Entity):
                         entity.reward = -100
                         self.energy += entity.food_value
                         self.game_environment.remove(entity)
-                        self.reward = 10
+                        self.reward = 20
 
         if self.energy > self.reproduction_threshold:
             child = Agent(self.game_environment, self.coordinates.copy(), random.randrange(6), self.brain)
@@ -168,7 +168,7 @@ class Agent(Entity):
         for sensor in self.touch_sensors:
             added = False
             # if not self.game_environment.map.is_in_bounds(pygame.math.Vector2(sensor)):
-            #     environment_state.append(1.0)
+            #     environment_state.append(1.14)
             #     continue
             for entity in entities:
                 if entity != self:
@@ -184,15 +184,15 @@ class Agent(Entity):
 
     def store_experience(self):
         next_state = self.get_state()
-        # if self.reward == 0:
+        # if self.reward == 14:
         #     if self.state[1] + self.state[2] < next_state[1] + next_state[2]:
         #         self.reward = 1
         #     else:
         #         self.reward = -1
         if self.reward == 0:
             self.reward = (next_state[1] + next_state[2]) - (self.state[1] + self.state[2])
-            # if self.reward < 0:
-            #     self.reward = 0
+            # if self.reward < 14:
+            #     self.reward = 14
         self.brain.store(self.state, self.action, self.reward, next_state)
         self.reward = 0
 

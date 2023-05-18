@@ -5,7 +5,7 @@ import pygame
 import sys
 import csv
 
-from brain import QLearningControls, HyperParameters, DeepQLearningControls
+from brain import QLearningControls, HyperParameters, DeepQLearningControls, ClosestQLearningControls
 from game_environment import GameEnvironment
 from global_data import BLACK
 from param_handler import handle_params
@@ -30,17 +30,22 @@ class Camera:
             self.offset.update(pygame.Vector2(self.offset.x - speed, self.offset.y))
 
 
-def main():
-    handle_params()
+def main(task):
+    # handle_params()
     clock = pygame.time.Clock()
     game = GameEnvironment()
 
     if not HyperParameters.deep_learning:
-        carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
-        herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+        if task == 0:
+            carnivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+            herbivoreAI = QLearningControls(HyperParameters.AI_DIRECTORY)
+        else:
+            carnivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
+            herbivoreAI = ClosestQLearningControls(HyperParameters.AI_DIRECTORY)
     else:
         carnivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
         herbivoreAI = DeepQLearningControls(HyperParameters.AI_DIRECTORY)
+
     os.makedirs(f"{os.getcwd()}/{HyperParameters.AI_DIRECTORY}", exist_ok=True)
 
     try:
@@ -75,14 +80,22 @@ def main():
     except:
         pass
     header = ["episode",
+              "iterations",
               "epsilon",
               "time",
               "car_avg",
               "car_min",
               "car_max",
+              "car_cumulative",
+              "car_reproductions",
+              "car_table_size",
               "her_avg",
               "her_min",
-              "her_max"]
+              "her_max",
+              "her_cumulative",
+              "her_reproductions",
+              "her_table_size",
+              ]
     while True:
         frame_start_time = time.time()
         screen.fill((255, 255, 255))
@@ -99,7 +112,8 @@ def main():
         if keys[pygame.K_TAB]:
             draw = not draw
 
-        if game.is_simulation_dead():
+        if game.is_simulation_dead() or HyperParameters.reached_max_iterations():
+
             render_over = True
             if HyperParameters.learning:
                 end_time = time.time()
@@ -107,43 +121,55 @@ def main():
                 episode_stats = []
 
                 episode_stats.append(HyperParameters.episode)
+                episode_stats.append(HyperParameters.iteration)
                 episode_stats.append(HyperParameters.epsilon)
                 episode_stats.append(end_time - start_time)
 
-                avg, min, max = carnivoreAI.calculate_stats()
+                avg, min, max, cumulative, reproductions = carnivoreAI.calculate_stats()
 
                 episode_stats.append(avg)
                 episode_stats.append(min)
                 episode_stats.append(max)
+                episode_stats.append(cumulative)
+                episode_stats.append(reproductions)
+                episode_stats.append(len(carnivoreAI.Q_Table.keys()))
 
-                avg, min, max = herbivoreAI.calculate_stats()
+                avg, min, max, cumulative, reproductions = herbivoreAI.calculate_stats()
 
                 episode_stats.append(avg)
                 episode_stats.append(min)
                 episode_stats.append(max)
+                episode_stats.append(cumulative)
+                episode_stats.append(reproductions)
+                episode_stats.append(len(herbivoreAI.Q_Table.keys()))
 
                 stats.append(episode_stats)
 
                 start_time = time.time()
 
-                carnivoreAI.learn()
-                herbivoreAI.learn()
-
                 # frame_end_time = time.time()
                 # frametimes.append(frame_end_time - frame_start_time)
 
                 HyperParameters.decay_epsilon()
-                if HyperParameters.epsilon == 0:
-                    with open(f"{HyperParameters.AI_DIRECTORY}/stats.csv", 'w', encoding='UTF8', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerow(header)
-                        writer.writerows(stats)
-                    carnivoreAI.save("carnivore")
-                    herbivoreAI.save("herbivore")
-                    HyperParameters.epsilon = 1
+                # if HyperParameters.reached_max_iterations():
+                with open(f"{HyperParameters.AI_DIRECTORY}/stats.csv", 'w', encoding='UTF8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(header)
+                    writer.writerows(stats)
+                    if HyperParameters.episode % 100 == 0:
+                        carnivoreAI.save(f"carnivore{HyperParameters.episode}")
+                        herbivoreAI.save(f"herbivore{HyperParameters.episode}")
+                # HyperParameters.epsilon = 1
                 game.reset_simulation()
                 render_over = False
                 HyperParameters.episode += 1
+                # HyperParameters.iteration = 0
+                if HyperParameters.learning:
+                    carnivoreAI.learn()
+                    herbivoreAI.learn()
+                    # HyperParameters.iteration += 1
+                if HyperParameters.episode == 1001:
+                    return
             if keys[pygame.K_SPACE]:
                 game.reset_simulation()
                 render_over = False
@@ -164,6 +190,10 @@ def main():
             screen.blit(font.render(f"Press space to restart", True, BLACK), (screen.get_width() / 2 - 120, 350))
 
         pygame.display.update()
+        # if HyperParameters.learning:
+        #     carnivoreAI.learn()
+        #     herbivoreAI.learn()
+        #     HyperParameters.iteration += 1
         # frame_end_time = time.time()
         # frametimes.append(frame_end_time - frame_start_time)
         if not HyperParameters.learning:
@@ -171,4 +201,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    HyperParameters.episode = 1
+    HyperParameters._episode = 0
+    HyperParameters.epoch = 0
+    HyperParameters.iteration = 0
+    HyperParameters.epsilon = 1
+    HyperParameters.AI_DIRECTORY = "basic"
+    main(0)
+

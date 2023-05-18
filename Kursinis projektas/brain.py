@@ -1,3 +1,4 @@
+import math
 import random
 from collections import deque
 
@@ -89,7 +90,7 @@ class QLearningControls(Controls):
         print(json.dumps(self.Q_Table, indent=2))
 
     def calculate_stats(self):
-        stats = sum(self.rewards) / len(self.rewards), min(self.rewards), max(self.rewards)
+        stats = sum(self.rewards) / len(self.rewards), min(self.rewards), max(self.rewards), sum(self.rewards), self.rewards.count(100)
         self.rewards.clear()
         return stats
 
@@ -104,6 +105,46 @@ class QLearningControls(Controls):
                 self.Q_Table = json.load(f)
         except:
             pass
+
+
+class ClosestQLearningControls(QLearningControls):
+
+    def get_action(self, state):
+        key = self.state_to_key(state)
+        row = self.Q_Table.get(key)
+        if row is None:
+            row = [self.find_closes(state), state]
+            self.Q_Table[key] = row
+        if random.random() < HyperParameters.epsilon:
+            return random.randint(0, HyperParameters.action_size-1)
+        return np.argmax(row[0])
+
+    def find_closes(self, state):
+        closest = [random.random() for _ in range(HyperParameters.action_size)]
+        values = self.Q_Table.values()
+        distance = float('inf')
+        for value in values:
+            this_distance = math.dist(state, value[1])
+            if this_distance < distance:
+                distance = this_distance
+                closest = value[0]
+        return closest.copy()
+
+    def learn(self):
+        for (state, action, reward, next_state) in self.replay_memory:
+            key = self.state_to_key(state)
+            row = self.Q_Table.get(key) or [self.find_closes(next_state), next_state]
+            # print(key)
+            # print(self.Q_Table)
+            old_q = 0
+            if row[0] is not None:
+                old_q = row[0][action]
+            next_key = self.state_to_key(next_state)
+            next_row = self.Q_Table.get(next_key) or [self.find_closes(next_state), next_state]
+            self.Q_Table[next_key] = next_row
+            max_q = max(next_row[0])
+            row[0][action] = HyperParameters.inverse_alpha * old_q + HyperParameters.learning_rate * (reward + HyperParameters.discount * max_q)
+        self.replay_memory.clear()
 
 
 class DeepQLearningControls(Controls):
@@ -128,9 +169,9 @@ class DeepQLearningControls(Controls):
     def build_compile_model(self):
         model = Sequential()
         model.add(Dense(7, input_shape=[7], activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(32, activation='relu'))
-        model.add(Dense(32, activation='relu'))
+        model.add(Dense(7, activation='relu'))
+        model.add(Dense(7, activation='relu'))
+        model.add(Dense(7, activation='relu'))
         # model.add(Dense(64, activation='relu'))
         model.add(Dense(4, activation='sigmoid'))
 
