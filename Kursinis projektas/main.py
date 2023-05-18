@@ -156,8 +156,9 @@ def main(task):
                     writer = csv.writer(f)
                     writer.writerow(header)
                     writer.writerows(stats)
-                # carnivoreAI.save("carnivore")
-                # herbivoreAI.save("herbivore")
+                    if HyperParameters.episode % 100 == 0:
+                        carnivoreAI.save(f"carnivore{HyperParameters.episode}")
+                        herbivoreAI.save(f"herbivore{HyperParameters.episode}")
                 # HyperParameters.epsilon = 1
                 game.reset_simulation()
                 render_over = False
@@ -205,37 +206,6 @@ if __name__ == '__main__':
     HyperParameters.epoch = 0
     HyperParameters.iteration = 0
     HyperParameters.epsilon = 1
-    HyperParameters.AI_DIRECTORY = "spedup-low1"
+    HyperParameters.AI_DIRECTORY = "basic"
     main(0)
-    HyperParameters.episode = 1
-    HyperParameters._episode = 0
-    HyperParameters.epoch = 0
-    HyperParameters.iteration = 0
-    HyperParameters.epsilon = 1
-    HyperParameters.AI_DIRECTORY = "spedup-low2"
-    HyperParameters.max_entities = 15
-    main(0)
-    HyperParameters.episode = 1
-    HyperParameters._episode = 0
-    HyperParameters.epoch = 0
-    HyperParameters.iteration = 0
-    HyperParameters.epsilon = 1
-    HyperParameters.AI_DIRECTORY = "spedup-low3"
-    HyperParameters.max_entities = 25
-    main(0)
-    HyperParameters.episode = 1
-    HyperParameters._episode = 0
-    HyperParameters.epoch = 0
-    HyperParameters.iteration = 0
-    HyperParameters.epsilon = 1
-    HyperParameters.AI_DIRECTORY = "spedup-low4"
-    HyperParameters.max_entities = 35
-    main(0)
-    # for i in range(3):
-    #     HyperParameters.episode = 1
-    #     HyperParameters._episode = 0
-    #     HyperParameters.epoch = 0
-    #     HyperParameters.iteration = 0
-    #     HyperParameters.epsilon = 1
-    #     HyperParameters.AI_DIRECTORY = "CLOSEST_AVERAGE2/" + str(i)
-    #     main(1)
+
