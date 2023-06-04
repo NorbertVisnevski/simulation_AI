@@ -68,7 +68,9 @@ def main(task):
     start_time = time.time()
     frametimes = []
     draw = False
+    render_stats = True
     render_over = False
+    lock_fps = False
 
     stats=[]
     try:
@@ -111,6 +113,10 @@ def main(task):
 
         if keys[pygame.K_TAB]:
             draw = not draw
+        if keys[pygame.K_i]:
+            render_stats = not render_stats
+        if keys[pygame.K_l]:
+            lock_fps = not lock_fps
 
         if game.is_simulation_dead() or HyperParameters.reached_max_iterations():
 
@@ -179,10 +185,11 @@ def main(task):
 
         if draw or not HyperParameters.learning:
             game.draw(screen, camera)
-        screen.blit(font.render(f"Carnivores: {game.carnivores}", True, BLACK), (0, 0))
-        screen.blit(font.render(f"Herbivores: {game.herbivores}", True, BLACK), (0, 36))
-        screen.blit(font.render(f"Episode: {HyperParameters.episode}", True, BLACK), (0, 72))
-        screen.blit(font.render(f"Epsilon: {round(HyperParameters.epsilon,5)}", True, BLACK), (0, 108))
+        if render_stats:
+            screen.blit(font.render(f"Carnivores: {game.carnivores}", True, BLACK), (0, 0))
+            screen.blit(font.render(f"Herbivores: {game.herbivores}", True, BLACK), (0, 36))
+            screen.blit(font.render(f"Episode: {HyperParameters.episode}", True, BLACK), (0, 72))
+            screen.blit(font.render(f"Epsilon: {round(HyperParameters.epsilon,5)}", True, BLACK), (0, 108))
 
         if render_over:
             screen.blit(font.render(f"Simulation over!", True, BLACK), (screen.get_width() / 2 - 100, 250))
@@ -196,16 +203,17 @@ def main(task):
         #     HyperParameters.iteration += 1
         # frame_end_time = time.time()
         # frametimes.append(frame_end_time - frame_start_time)
-        if not HyperParameters.learning:
+        if lock_fps:
             clock.tick(60)
 
 
 if __name__ == '__main__':
-    HyperParameters.episode = 1
-    HyperParameters._episode = 0
+    HyperParameters.episode = 8000
+    HyperParameters._episode = 8000
     HyperParameters.epoch = 0
+    HyperParameters.learning = False
     HyperParameters.iteration = 0
-    HyperParameters.epsilon = 1
-    HyperParameters.AI_DIRECTORY = "basic"
+    HyperParameters.epsilon = 0.1
+    HyperParameters.AI_DIRECTORY = "q-learning"
     main(0)
 

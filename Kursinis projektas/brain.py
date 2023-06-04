@@ -96,15 +96,12 @@ class QLearningControls(Controls):
 
     def save(self, file):
         serialized = json.dumps(self.Q_Table, indent=2)
-        with open(f"{self.directory}/{file}{HyperParameters.episode}", "w") as f:
+        with open(f"{self.directory}/{file}", "w") as f:
             f.write(serialized)
 
     def load(self, file):
-        try:
-            with open(f"{self.directory}/{file}", "r") as f:
-                self.Q_Table = json.load(f)
-        except:
-            pass
+        with open(f"{self.directory}/{file}", "r") as f:
+            self.Q_Table = json.load(f)
 
 
 class ClosestQLearningControls(QLearningControls):
@@ -232,7 +229,7 @@ class DeepQLearningControls(Controls):
         return stats
 
     def save(self, file):
-        self.model.save_weights(f"{self.directory}/{file}{HyperParameters.episode}")
+        self.model.save_weights(f"{self.directory}/{file}")
 
     def load(self, file):
         self.model.load_weights(f"{self.directory}/{file}")
